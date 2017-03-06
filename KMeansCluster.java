@@ -17,8 +17,15 @@ public class KMeansCluster {
         @Override
         public double getDis(Point p1, Point p2) {
             //欧几里德距离
-            return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2));
-        }
+            double dis = 0.0;
+            for(int i = 0; i < p1.getX().size(); i++) {
+                if(p1.getX().get(i) instanceof String) {
+                    dis += p1.getX().get(i).equals(p2.getX().get(i)) ? 0 : 1;
+                } else {
+                    dis += Math.pow((double)p1.getX().get(i) - (double)p2.getX().get(i), 2);
+                }
+            }
+            return Math.sqrt(dis); }
     };
 
     //构造函数 簇的个数、迭代次数、样本集路径
@@ -66,8 +73,8 @@ public class KMeansCluster {
         check();
         //读取文件，init data
         //处理原始数据
-        for (int i = 0, j = datas.size(); i < j; i++)
-            data.add(new Point(i, datas.get(i), 0));
+//        for (int i = 0, j = datas.size(); i < j; i++)
+//            data.add(new Point(i, datas.get(i), 0));
     }
 
     /**
@@ -75,13 +82,23 @@ public class KMeansCluster {
      * @return
      */
     public Set<Point> chooseCenter() {
-        double x = 0.0, y = 0.0;
-        for (int i = 0, n = data.size(); i < n; i++) {
-            x += data.get(i).getX();
+        ArrayList x0 = new ArrayList();
+        double y = 0.0;
+        int elementSize= data.get(0).getX().size();//X的维度
+        for(int k = 0; k < elementSize; k++) {
+            for (int i = 0, n = data.size(); i < n; i++) {
+                x0.add((Double)data.get(i).getX().get(k));
+            }
+        }
+        for(int i = 0, n = data.size(); i < n; i++) {
             y += data.get(i).getY();
         }
+        ArrayList x = new ArrayList();
+        for(int k3 = 0; k3 < elementSize; k3++) {
+            x.add((double)x0.get(k3) / (double) elementSize);
+        }
         //样本中心点C
-        Point C = new Point(-1, x / data.size(), y / data.size());
+        Point C = new Point(-1, x, y / data.size());
         Set<Point> center = new HashSet<Point>();
         //将所有样本点的平均值作为第一个初始聚类中心加入center
         Point[] p = null;
@@ -204,18 +221,28 @@ public class KMeansCluster {
                 //得到簇i的所有成员
                 List<Point> ps = cluster.get(j).getMembers();
                 int size = ps.size();
+                int elementSize = ps.get(0).getX().size();
                 if (size < 3) {//簇的样本成员数量低于3,则不再计算
                     center.add(cluster.get(j).getCenter());
                     continue;
                 }
                 // 计算距离
-                double x = 0.0, y = 0.0;
-                for (int k1 = 0; k1 < size; k1++) {
-                    x += ps.get(k1).getX();
-                    y += ps.get(k1).getY();
+                ArrayList x0 = new ArrayList();
+                double y = 0.0;
+                for (int k1 = 0; k1 < elementSize; k1++) {
+                    for(int k2 = 0; k2 < size; k2++) {
+                        x0.add((Double)ps.get(k2).getX().get(k1));
+                    }
+                }
+                for(int i = 0, n = data.size(); i < n; i++) {
+                    y += data.get(i).getY();
+                }
+                ArrayList x = new ArrayList();
+                for(int k3 = 0; k3 < elementSize; k3++) {
+                    x.add((double)x0.get(k3) / (double) elementSize);
                 }
                 //得到新的聚类中心点
-                Point nc = new Point(-1, x / size, y / size, false);
+                Point nc = new Point(-1, x , y / size, false);
                 center.add(nc);
             }
             if (lastCenter.containsAll(center))//中心点不在变化，则表明已经收敛,退出迭代
@@ -226,6 +253,7 @@ public class KMeansCluster {
         }
         return cluster;
     }
+
 
     /**
      * 输出聚类信息到控制台

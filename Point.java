@@ -1,5 +1,7 @@
 package ML.Kmeans.Kmeans_opt;
 
+import java.util.ArrayList;
+
 /**
  * Created by xwz on 3/2/17.
  *
@@ -7,27 +9,28 @@ package ML.Kmeans.Kmeans_opt;
  */
 
 public class Point {
-    private double x; //X坐标
+    private ArrayList x; //X坐标
     private double y; //Y坐标
+    //private double[] weight;
     private int id;
     private boolean beyond;//标识是否属于样本
 
     //构造函数
-    public Point(int id, double x, double y) {
+    public Point(int id, ArrayList x, double y) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.beyond = true;
     }
 
-    public Point(int id, double x, double y, boolean beyond) {
+    public Point(int id, ArrayList x, double y, boolean beyond) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.beyond = beyond;
     }
 
-    public double getX() {
+    public ArrayList getX() {
         return x;
     }
 
@@ -54,22 +57,20 @@ public class Point {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         Point point = (Point) o;
 
-        if (Double.compare(point.x, x) != 0) return false;
-        if (Double.compare(point.y, y) != 0) return false;
+        if (point.x.equals(x) && (Double.compare(point.y, y) != 0)) return true;
 
-        return true;
+        return false;
     }
 
     @Override
     public int hashCode() {
         int result;
         long temp;
-        temp = x != +0.0d ? Double.doubleToLongBits(x) : 0L;
+        temp = x.indexOf(0);
         result = (int) (temp ^ (temp >>> 32));
         temp = y != +0.0d ? Double.doubleToLongBits(y) : 0L;
         result = 31 * result + (int) (temp ^ (temp >>> 32));
